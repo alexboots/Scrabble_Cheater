@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash'
 // TODO: could make this more performant and not have to use shouldComponentUpdate if we 
 //  map between the backends format (which is the same as this array) and some sort of frontend flat object
 const blankBoard = new Array(15).fill([], 0, 15).map((elem, i) => {
-  return new Array(15).fill('', 0, 15)
+  return new Array(15).fill(null, 0, 15)
 })
 
 const defaultState = {
@@ -24,13 +24,15 @@ const board = (state = defaultState, action) => {
     case CHANGE_COORDINATE_VALUE:
       const  { x, y } = action.coordinates
     
-      newTiles[y][x] = action.value
+      // If the user has set the input to blank (which react likes to use '' for)
+      // set it to null in the `state` as the backend expects a null value
+      newTiles[y][x] = action.value === "" ? null : action.value
 
       return {
         ...state,
         tiles: newTiles
       }
-    case PLAY_WORD: 
+    case PLAY_WORD:
       const { wordInfo } = action
       const firstY = wordInfo[1][0][0]
       const secondY = wordInfo[1][1][0]
