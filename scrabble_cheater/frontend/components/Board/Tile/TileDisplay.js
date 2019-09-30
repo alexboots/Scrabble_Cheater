@@ -1,3 +1,5 @@
+import './TileDisplay.less'
+
 import React, { Component } from 'react'
 import { Table } from 'semantic-ui-react'
 import classNames from 'classnames'
@@ -6,14 +8,11 @@ import { some } from 'lodash'
 
 import { scores } from  '../../../constants/board'
 
-import './TileDisplay.less'
-
 class TileDisplay extends Component {
   constructor(props) {
     super(props)
     this.state = {
       highlightCell: false,
-      onBoard: false,
       blankTile: false,
       tl: false,
       dw: false,
@@ -41,41 +40,42 @@ class TileDisplay extends Component {
   componentWillReceiveProps(nextProps) {
     if(nextProps.letterToHighlight !== '') {
       this.setHighlightStyles(nextProps.letterToHighlight)
-    }
+    } 
 
-    if(nextProps.letterToHighlight === '' && this.state.highlightCell) {
+    const clearHighlightCell = nextProps.letterToHighlight === '' && this.state.highlightCell
+    if(clearHighlightCell) {
       // Reset highlight state
       this.setState({
-        onBoard: false,
         blankTile: false,
         highlightCell: false
       })
     }
 
-    // If the tile has been previously played, and the tile played is blank, 
+    // If the tile has been played, and the tile played is blank, 
     // display it with underline
     if(nextProps.cellCharacter && nextProps.cellCharacter[1]  === '_') {
       this.setState({
         blankTile: true
       })
+    } else if(!nextProps.cellCharacter && this.state.blankTile) {
+      // Reset this.state.blankTile if tile is cleared and it was blank
+      this.setState({
+        blankTile: false
+      })
     }
   }
 
   setHighlightStyles = (letterToHighlight) => {
-    let onBoard = false
     let blankTile = false
     const highlightCell = true
 
     const letter = letterToHighlight
 
-    if(letter[1] === '#') {
-      onBoard = true 
-    } else if (letter[1] === '_') {
+    if (letter[1] === '_') {
       blankTile = true
     }
 
     this.setState({
-      onBoard,
       blankTile,
       highlightCell
     })
@@ -110,7 +110,6 @@ class TileDisplay extends Component {
     let playedTile = this.props.cellCharacter ? true : false
     return (
       <Table.Cell
-        selectable
         textAlign='center'
         className={ classNames('tile-bg-color', { 
           'tw': this.state.tw,
@@ -118,8 +117,7 @@ class TileDisplay extends Component {
           'tl': this.state.tl,
           'dl': this.state.dl,
           'played-tile': playedTile,
-          'highlight-word-location': this.state.highlightCell,
-          'on-board': this.state.onBoard
+          'highlight-word-location': this.state.highlightCell
         }) }
         onClick={ this.props.handleMakeTileEditable }
       >
